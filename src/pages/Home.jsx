@@ -41,8 +41,8 @@ function Home() {
         return (
             <div className="flex justify-center items-center min-h-screen bg-black transition-opacity duration-300 ease-in-out opacity-100">
                 <Container>
-                    <div className="text-center text-orange-400 fade-in">
-                        <h1 className="text-2xl font-bold">
+                    <div className="text-center text-orange-400 fade-in ">
+                    <h1 className="text-2xl font-bold typing-effect transition-opacity duration-500 ease-in-out">
                             Please log in to view posts.
                         </h1>
                     </div>

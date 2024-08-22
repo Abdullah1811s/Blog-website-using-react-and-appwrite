@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Input, Select, RTE } from '../index';
 import { useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
@@ -18,13 +18,15 @@ function PostForm({ post }) {
 
     const navigate = useNavigate();
     const userData = useSelector((state) => state.auth.userDetail.payload);
-    
+    const [loading, setLoading] = useState(false); 
+
     const Submit = async (data) => {
+        setLoading(true); 
         try {
             if (post) {
                 const file = data.image?.[0] ? await databasesService.uploadFile(data.image[0]) : null;
                 if (file) {
-                    await databasesService.deleteFile(post.image); 
+                    await databasesService.deleteFile(post.image);
                 }
                 const updated = await databasesService.updatePost(post.$id, {
                     ...data,
@@ -36,8 +38,8 @@ function PostForm({ post }) {
                 if (file) {
                     const fileID = file.$id;
                     data.image = fileID;
-                  
-                    if(userData) {
+                    
+                    if (userData) {
                         const addedDoc = await databasesService.createPost({
                             ...data,
                             userId: userData.$id    
@@ -50,6 +52,8 @@ function PostForm({ post }) {
             }
         } catch (error) {
             console.error('Failed to submit the form:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -119,9 +123,39 @@ function PostForm({ post }) {
                 />
                 <Button
                     type="submit"
-                    className={`w-full py-2 px-4 rounded-md shadow-lg text-gray-100 transition-colors duration-300 ${post ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-600 hover:bg-orange-700'}`}
+                    className={`w-full py-2 px-4 rounded-md shadow-lg text-gray-100 transition-colors duration-300 ${
+                        loading
+                            ? 'bg-gray-600 cursor-wait' // Style for loading state
+                            : (post ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-600 hover:bg-orange-700')
+                    }`}
                 >
-                    {post ? "Update" : "Submit"}
+                    {loading ? (
+                        <span className="flex items-center justify-center">
+                            <svg
+                                className="animate-spin h-5 w-5 mr-3 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                ></circle>
+                                <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"
+                                ></path>
+                            </svg>
+                            Processing...
+                        </span>
+                    ) : (
+                        (post ? "Update" : "Submit")
+                    )}
                 </Button>
             </div>
         </form>
